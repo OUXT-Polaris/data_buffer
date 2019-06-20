@@ -20,7 +20,7 @@ namespace data_buffer
             data_ = std::vector<T>(0);
         }
         ~DataBufferBase(){}
-        void queryData(ros::Time from,ros::Time to,std::string key,std::vector<T>& ret)
+        void queryData(ros::Time from,ros::Time to,std::vector<T>& ret)
         {
             update();
             mtx.lock();
@@ -32,9 +32,18 @@ namespace data_buffer
             }
             for(auto itr = data_.begin(); itr != data_.end(); itr++)
             {
-                if(itr->header.stamp > from && itr->header.stamp < to)
+                try
                 {
-                    ret.push_back(*itr);
+                    if(itr->header.stamp > from && itr->header.stamp < to)
+                    {
+                        ret.push_back(*itr);
+                    }
+                }
+                catch(std::exception& e)
+                {
+                    ROS_ERROR_STREAM(e.what());
+                    mtx.unlock();
+                    return;
                 }
             }
             mtx.unlock();
@@ -48,42 +57,51 @@ namespace data_buffer
             mtx.unlock();
             return;
         }
-        bool queryData(ros::Time timestamp, std::string key,T& data)
+        bool queryData(ros::Time timestamp, T& data)
         {
             mtx.lock();
-            data = T();
-            std::vector<T> data_array = getData();
-            if(data_array.size() == 0)
+            try
             {
-                mtx.unlock();
-                return false;
-            }
-            if(data_array.size() == 1)
-            {
-                data = data_array[0];
-                mtx.unlock();
-                return true;
-            }
-            if(data_array[0].header.stamp > timestamp)
-            {
-                mtx.unlock();
-                return false;
-            }
-            if(data_array[data_array.size()-1].header.stamp < timestamp)
-            {
-                int index = data_array.size()-2;
-                data = interpolate(data_array[index],(data_array)[index+1],timestamp);
-                mtx.unlock();
-                return true;
-            }
-            for(int i =0; i<data_array.size()-1; i++)
-            {
-                if(data_array[i].header.stamp < timestamp && timestamp < data_array[i+1].header.stamp)
+                data = T();
+                std::vector<T> data_array = getData();
+                if(data_array.size() == 0)
                 {
-                    data = interpolate(data_array[i],data_array[i+1],timestamp);
+                    mtx.unlock();
+                    return false;
+                }
+                if(data_array.size() == 1)
+                {
+                    data = data_array[0];
                     mtx.unlock();
                     return true;
                 }
+                if(data_array[0].header.stamp > timestamp)
+                {
+                    mtx.unlock();
+                    return false;
+                }
+                if(data_array[data_array.size()-1].header.stamp < timestamp)
+                {
+                    int index = data_array.size()-2;
+                    data = interpolate(data_array[index],(data_array)[index+1],timestamp);
+                    mtx.unlock();
+                    return true;
+                }
+                for(int i =0; i<data_array.size()-1; i++)
+                {
+                    if(data_array[i].header.stamp < timestamp && timestamp < data_array[i+1].header.stamp)
+                    {
+                        data = interpolate(data_array[i],data_array[i+1],timestamp);
+                        mtx.unlock();
+                        return true;
+                    }
+                }
+            }
+            catch(std::exception& e)
+            {
+                ROS_ERROR_STREAM(e.what());
+                mtx.unlock();
+                return false;
             }
             mtx.unlock();
             return false;
