@@ -22,8 +22,12 @@ include_directories(
   include
 )
 
-# Install header files
-install(DIRECTORY include/${PROJECT_NAME}
-  DESTINATION include/${PROJECT_NAME}
-  FILES_MATCHING PATTERN "*.h"
+install(
+  DIRECTORY "include/"
+  DESTINATION include
 )
+
+ament_export_include_directories(include)
+ament_export_dependencies(rosidl_default_runtime)
+
+ament_package()
