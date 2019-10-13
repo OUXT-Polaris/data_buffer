@@ -5,9 +5,13 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include <cmath>
 
 //headers in ROS
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time.hpp>
+#include <rclcpp/clock.hpp>
+#include <builtin_interfaces/msg/time.hpp>
 
 namespace data_buffer
 {
@@ -15,12 +19,13 @@ namespace data_buffer
     class DataBufferBase
     {
     public:
-        DataBufferBase(std::string key,double buffer_length) : key(key),buffer_length(buffer_length)
+        DataBufferBase(std::shared_ptr<rclcpp::Node> node_ptr,std::string key,double buffer_length) : key(key),buffer_length(buffer_length)
         {
+            node_ptr_ = node_ptr;
             data_ = std::vector<T>(0);
         }
         ~DataBufferBase(){}
-        void queryData(ros::Time from,ros::Time to,std::vector<T>& ret)
+        void queryData(rclcpp::Time from,rclcpp::Time to,std::vector<T>& ret)
         {
             update();
             mtx.lock();
@@ -41,7 +46,7 @@ namespace data_buffer
                 }
                 catch(std::exception& e)
                 {
-                    ROS_ERROR_STREAM(e.what());
+                    RCLCPP_ERROR(node_ptr_->get_logger(), e.what());
                     mtx.unlock();
                     return;
                 }
@@ -57,7 +62,7 @@ namespace data_buffer
             mtx.unlock();
             return;
         }
-        bool queryData(ros::Time timestamp, T& data)
+        bool queryData(rclcpp::Time timestamp, T& data)
         {
             mtx.lock();
             try
@@ -99,19 +104,29 @@ namespace data_buffer
             }
             catch(std::exception& e)
             {
-                ROS_ERROR_STREAM(e.what());
+                RCLCPP_ERROR(node_ptr_->get_logger(), e.what());
                 mtx.unlock();
                 return false;
             }
             mtx.unlock();
             return false;
         }
-        virtual T interpolate(T data0,T data1,ros::Time stamp) = 0;
+        virtual T interpolate(T data0,T data1,rclcpp::Time stamp) = 0;
         const std::string key;
         const double buffer_length;
         std::mutex mtx;
         std::vector<T> getData(){return data_;};
+    protected:
+        double toSec(rclcpp::Duration duration)
+        {
+            double ret;
+            double nsecs = static_cast<double>(duration.nanoseconds());
+            ret = nsecs*std::pow((double)10.0,-9);
+            return ret;
+        }
     private:
+        std::shared_ptr<rclcpp::Node> node_ptr_;
+        rclcpp::Clock ros_clock_(rcl_clock_type_t RCL_ROS_TIME);
         std::vector<T> data_;
         bool compareTimeStamp(T data0,T data1)
         {
@@ -127,8 +142,8 @@ namespace data_buffer
         {
             std::vector<T> data;
             mtx.lock();
-            ros::Time now = ros::Time::now();
-            ros::Time target_timestamp = now - ros::Duration(buffer_length);
+            rclcpp::Time now = ros_clock_.now();
+            rclcpp::Time target_timestamp = now - rclcpp::Duration(buffer_length);
             for(auto itr = data_.begin(); itr != data_.end(); itr++)
             {
                 if(itr->header.stamp > target_timestamp)
