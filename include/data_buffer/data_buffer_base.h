@@ -19,9 +19,9 @@ namespace data_buffer
     class DataBufferBase
     {
     public:
-        DataBufferBase(std::shared_ptr<rclcpp::Node> node_ptr,std::string key,double buffer_length) : key(key),buffer_length(buffer_length)
+        DataBufferBase(rclcpp::Clock clock,std::string key,double buffer_length) 
+            : ros_clock_(clock),key(key),buffer_length(buffer_length)
         {
-            node_ptr_ = node_ptr;
             data_ = std::vector<T>(0);
         }
         ~DataBufferBase(){}
@@ -46,7 +46,6 @@ namespace data_buffer
                 }
                 catch(std::exception& e)
                 {
-                    RCLCPP_ERROR(node_ptr_->get_logger(), e.what());
                     mtx.unlock();
                     return;
                 }
@@ -104,7 +103,6 @@ namespace data_buffer
             }
             catch(std::exception& e)
             {
-                RCLCPP_ERROR(node_ptr_->get_logger(), e.what());
                 mtx.unlock();
                 return false;
             }
@@ -125,8 +123,7 @@ namespace data_buffer
             return ret;
         }
     private:
-        std::shared_ptr<rclcpp::Node> node_ptr_;
-        rclcpp::Clock ros_clock_(rcl_clock_type_t RCL_ROS_TIME);
+        rclcpp::Clock ros_clock_;
         std::vector<T> data_;
         bool compareTimeStamp(T data0,T data1)
         {
