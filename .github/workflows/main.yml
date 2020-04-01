@@ -20,6 +20,10 @@ jobs:
                   sudo apt install ros-eloquent-desktop
                   source /opt/ros/eloquent/setup.bash
             - uses: actions/checkout@v2-beta
+            - name: Copy repository
+              run: |
+                  mkdir -p ~/ros2_ws/src/data_buffer
+                  cp -rf . ~/ros2_ws/src/data_buffer
             - name: Install dependencies
               run: |
                   source /opt/ros/eloquent/setup.bash
