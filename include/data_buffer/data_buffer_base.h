@@ -144,7 +144,8 @@ namespace data_buffer
             rclcpp::Time target_timestamp = now - rclcpp::Duration(buffer_length);
             for(auto itr = data_.begin(); itr != data_.end(); itr++)
             {
-                if(itr->header.stamp > target_timestamp)
+                rclcpp::Time header_stamp = itr->header.stamp;
+                if(header_stamp > target_timestamp)
                 {
                     data.push_back(*itr);
                 }
