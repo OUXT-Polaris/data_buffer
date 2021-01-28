@@ -1,17 +1,32 @@
-#ifndef DATA_BUFFER_DATA_BUFFER_BASE_H_INCLUDED
-#define DATA_BUFFER_DATA_BUFFER_BASE_H_INCLUDED
+// Copyright (c) 2019 OUXT Polaris
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-//headers in STL
-#include <vector>
-#include <map>
-#include <mutex>
-#include <cmath>
+#ifndef DATA_BUFFER__DATA_BUFFER_BASE_HPP_
+#define DATA_BUFFER__DATA_BUFFER_BASE_HPP_
 
-//headers in ROS
+// headers in ROS
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/time.hpp>
 #include <rclcpp/clock.hpp>
 #include <builtin_interfaces/msg/time.hpp>
+
+// headers in STL
+#include <vector>
+#include <map>
+#include <mutex>
+#include <cmath>
+#include <string>
 
 namespace data_buffer
 {
@@ -25,7 +40,9 @@ public:
     ros_clock_ = clock;
     data_ = std::vector<T>(0);
   }
-  ~DataBufferBase() {}
+  ~DataBufferBase()
+  {
+  }
   void queryData(rclcpp::Time from, rclcpp::Time to, std::vector<T> & ret)
   {
     update();
@@ -101,14 +118,17 @@ public:
   const std::string key;
   const double buffer_length;
   std::mutex mtx;
-  std::vector<T> getData() {return data_;}
+  std::vector<T> getData()
+  {
+    return data_;
+  }
 
 protected:
   double toSec(rclcpp::Duration duration)
   {
     double ret;
     double nsecs = static_cast<double>(duration.nanoseconds());
-    ret = nsecs * std::pow((double)10.0, -9);
+    ret = nsecs * std::pow(10.0, -9);
     return ret;
   }
 
@@ -122,9 +142,11 @@ private:
   void reorderData()
   {
     mtx.lock();
-    std::sort(data_.begin(), data_.end(),
-      std::bind(&DataBufferBase::compareTwistTimeStamp, this, std::placeholders::_1,
-      std::placeholders::_2));
+    std::sort(
+      data_.begin(), data_.end(),
+      std::bind(
+        &DataBufferBase::compareTwistTimeStamp, this, std::placeholders::_1,
+        std::placeholders::_2));
     mtx.unlock();
   }
   void update()
@@ -143,5 +165,5 @@ private:
     mtx.unlock();
   }
 };
-}
-#endif  //DATA_BUFFER_DATA_BUFFER_BASE_H_INCLUDED
+}  // namespace data_buffer
+#endif  // DATA_BUFFER__DATA_BUFFER_BASE_HPP_
