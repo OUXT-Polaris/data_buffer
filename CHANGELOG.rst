@@ -2,8 +2,8 @@
 Changelog for package data_buffer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2021-07-21)
+------------------
 * Merge pull request `#8 <https://github.com/OUXT-Polaris/data_buffer/issues/8>`_ from OUXT-Polaris/workflow/galactic
   update CI workflow for galactic
 * update .github/workflows/ROS2-Galactic.yaml
