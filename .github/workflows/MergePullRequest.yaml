@@ -1,0 +1,21 @@
+name: Merge Pull Request
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch:
+
+jobs:
+  merge_pull_request:
+    name: Merge Bot PR
+    runs-on: ubuntu-20.04
+    steps:
+    - name: automerge
+      uses: buildsville/simple-merge@v1
+      id: merge
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        method: 'squash'
+        labels: '[ "bot" ]'
+        title: 'Merge bot commit'
+        message: 'Merge bot commit'
