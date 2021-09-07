@@ -16,21 +16,21 @@
 #define DATA_BUFFER__DATA_BUFFER_BASE_HPP_
 
 // headers in ROS
+#include <builtin_interfaces/msg/time.hpp>
+#include <rclcpp/clock.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/time.hpp>
-#include <rclcpp/clock.hpp>
-#include <builtin_interfaces/msg/time.hpp>
 
 // headers in STL
-#include <vector>
+#include <cmath>
 #include <map>
 #include <mutex>
-#include <cmath>
 #include <string>
+#include <vector>
 
 namespace data_buffer
 {
-template<class T>
+template <class T>
 class DataBufferBase
 {
 public:
@@ -40,9 +40,7 @@ public:
     ros_clock_ = clock;
     data_ = std::vector<T>(0);
   }
-  ~DataBufferBase()
-  {
-  }
+  ~DataBufferBase() {}
   void queryData(rclcpp::Time from, rclcpp::Time to, std::vector<T> & ret)
   {
     update();
@@ -118,10 +116,7 @@ public:
   const std::string key;
   const double buffer_length;
   std::mutex mtx;
-  std::vector<T> getData()
-  {
-    return data_;
-  }
+  std::vector<T> getData() { return data_; }
 
 protected:
   double toSec(rclcpp::Duration duration)
@@ -135,10 +130,7 @@ protected:
 private:
   rclcpp::Clock::SharedPtr ros_clock_;
   std::vector<T> data_;
-  bool compareTimeStamp(T data0, T data1)
-  {
-    return data0.header.stamp < data1.header.stamp;
-  }
+  bool compareTimeStamp(T data0, T data1) { return data0.header.stamp < data1.header.stamp; }
   void reorderData()
   {
     mtx.lock();
