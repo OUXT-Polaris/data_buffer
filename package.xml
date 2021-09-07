@@ -14,7 +14,7 @@
   <build_export_depend>rclcpp</build_export_depend>
   <exec_depend>rclcpp</exec_depend>
   <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ouxt_lint_common</depend>
+  <test_depend>ouxt_lint_common</test_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
