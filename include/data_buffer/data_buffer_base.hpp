@@ -128,7 +128,7 @@ protected:
   }
   std::chrono::nanoseconds toChronoNanoSeconds(double sec)
   {
-    std::chrono::nanoseconds ret{sec * 1000000000};
+    std::chrono::nanoseconds ret(sec * std::pow(10, 9));
     return ret;
   }
 
