@@ -126,6 +126,11 @@ protected:
     ret = nsecs * std::pow(10.0, -9);
     return ret;
   }
+  std::chrono::nanoseconds toChronoNanoSeconds(double sec)
+  {
+    std::chrono::nanoseconds ret{sec * 1000000000};
+    return ret;
+  }
 
 private:
   rclcpp::Clock::SharedPtr ros_clock_;
@@ -146,7 +151,7 @@ private:
     std::vector<T> data;
     mtx.lock();
     rclcpp::Time now = ros_clock_->now();
-    rclcpp::Time target_timestamp = now - rclcpp::Duration(buffer_length);
+    rclcpp::Time target_timestamp = now - rclcpp::Duration(toChronoNanoSeconds(buffer_length));
     for (auto itr = data_.begin(); itr != data_.end(); itr++) {
       rclcpp::Time header_stamp = itr->header.stamp;
       if (header_stamp > target_timestamp) {
