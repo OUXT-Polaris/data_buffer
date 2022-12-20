@@ -150,12 +150,10 @@ private:
   {
     std::vector<T> data;
     mtx.lock();
-    rclcpp::Time now = ros_clock_->now();
-    rclcpp::Time target_timestamp = now - rclcpp::Duration(toChronoNanoSeconds(buffer_length));
-    for (auto itr = data_.begin(); itr != data_.end(); itr++) {
-      rclcpp::Time header_stamp = itr->header.stamp;
-      if (header_stamp > target_timestamp) {
-        data.push_back(*itr);
+    double now = ros_clock_->now().seconds();
+    for (const auto & each : data_) {
+      if (std::abs(now - rclcpp::Time(each.header.stamp).seconds()) <= buffer_length) {
+        data.emplace_back(each);
       }
     }
     data_ = data;
