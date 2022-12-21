@@ -126,6 +126,11 @@ protected:
     ret = nsecs * std::pow(10.0, -9);
     return ret;
   }
+  std::chrono::nanoseconds toChronoNanoSeconds(double sec)
+  {
+    std::chrono::nanoseconds ret(static_cast<long int>(sec * std::pow(10.0, 9)));
+    return ret;
+  }
 
 private:
   rclcpp::Clock::SharedPtr ros_clock_;
