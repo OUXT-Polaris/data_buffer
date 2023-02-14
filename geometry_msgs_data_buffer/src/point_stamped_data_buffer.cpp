@@ -27,7 +27,7 @@ PointStampedDataBuffer::~PointStampedDataBuffer() {}
 
 geometry_msgs::msg::PointStamped PointStampedDataBuffer::interpolate(
   const geometry_msgs::msg::PointStamped & data0, const geometry_msgs::msg::PointStamped & data1,
-  const rclcpp::Time & stamp)
+  const rclcpp::Time & stamp) const
 {
   geometry_msgs::msg::PointStamped ret;
   assert(data0.header.frame_id == data1.header.frame_id);
