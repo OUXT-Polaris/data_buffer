@@ -62,7 +62,7 @@ public:
     }
     mtx.unlock();
   }
-  void addData(T data)
+  void addData(const T & data)
   {
     update();
     mtx.lock();
@@ -112,7 +112,7 @@ public:
     mtx.unlock();
     return false;
   }
-  virtual T interpolate(const T & data0, const T & data1, const rclcpp::Time & stamp) = 0;
+  virtual T interpolate(const T & data0, const T & data1, const rclcpp::Time & stamp) const = 0;
   const std::string key;
   const double buffer_length;
   std::mutex mtx;
@@ -135,7 +135,7 @@ protected:
 private:
   rclcpp::Clock::SharedPtr ros_clock_;
   std::vector<T> data_;
-  bool compareTimeStamp(const T & data0, const T & data1)
+  bool compareTimeStamp(const T & data0, const T & data1) const
   {
     return data0.header.stamp < data1.header.stamp;
   }
