@@ -112,21 +112,21 @@ public:
     mtx.unlock();
     return false;
   }
-  virtual T interpolate(const T & data0, const T & data1, rclcpp::Time stamp) = 0;
+  virtual T interpolate(const T & data0, const T & data1, const rclcpp::Time & stamp) = 0;
   const std::string key;
   const double buffer_length;
   std::mutex mtx;
-  std::vector<T> getData() { return data_; }
+  std::vector<T> getData() const { return data_; }
 
 protected:
-  double toSec(rclcpp::Duration duration)
+  double toSec(rclcpp::Duration duration) const
   {
     double ret;
     double nsecs = static_cast<double>(duration.nanoseconds());
     ret = nsecs * std::pow(10.0, -9);
     return ret;
   }
-  std::chrono::nanoseconds toChronoNanoSeconds(double sec)
+  std::chrono::nanoseconds toChronoNanoSeconds(double sec) const
   {
     std::chrono::nanoseconds ret(static_cast<long int>(sec * std::pow(10.0, 9)));
     return ret;
@@ -135,7 +135,10 @@ protected:
 private:
   rclcpp::Clock::SharedPtr ros_clock_;
   std::vector<T> data_;
-  bool compareTimeStamp(T data0, T data1) { return data0.header.stamp < data1.header.stamp; }
+  bool compareTimeStamp(const T & data0, const T & data1)
+  {
+    return data0.header.stamp < data1.header.stamp;
+  }
   void reorderData()
   {
     mtx.lock();
