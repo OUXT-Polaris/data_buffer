@@ -34,14 +34,14 @@ template <class T>
 class DataBufferBase
 {
 public:
-  DataBufferBase(rclcpp::Clock::SharedPtr clock, std::string key, double buffer_length)
+  DataBufferBase(rclcpp::Clock::SharedPtr clock, const std::string & key, double buffer_length)
   : key(key), buffer_length(buffer_length)
   {
     ros_clock_ = clock;
     data_ = std::vector<T>(0);
   }
   ~DataBufferBase() {}
-  void queryData(rclcpp::Time from, rclcpp::Time to, std::vector<T> & ret)
+  void queryData(const rclcpp::Time & from, const rclcpp::Time & to, std::vector<T> & ret)
   {
     update();
     mtx.lock();
@@ -69,7 +69,7 @@ public:
     data_.push_back(data);
     mtx.unlock();
   }
-  bool queryData(rclcpp::Time timestamp, T & data)
+  bool queryData(const rclcpp::Time & timestamp, T & data)
   {
     mtx.lock();
     try {
@@ -112,7 +112,7 @@ public:
     mtx.unlock();
     return false;
   }
-  virtual T interpolate(T data0, T data1, rclcpp::Time stamp) = 0;
+  virtual T interpolate(const T & data0, const T & data1, rclcpp::Time stamp) = 0;
   const std::string key;
   const double buffer_length;
   std::mutex mtx;
